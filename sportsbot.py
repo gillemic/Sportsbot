@@ -27,10 +27,8 @@ def lookup_games(date):
 		today = datetime.datetime.now()
 		return Boxscores(datetime.date(today.year, today.month, today.day-1))
 	else:
-		day = datetime.datetime.strptime(date, '%m-%d-%Y')
+		day = datetime.datetime.strptime(date, '%m/%d/%Y')
 		return Boxscores(datetime.date(day.year, day.month, day.day))
-	#else:
-	#	return "Invalid date!"
 
 @bot.event
 async def on_ready():
@@ -43,19 +41,31 @@ async def on_message(message):
 	if message.author == bot.user:
 		return
 
-	args = message.content.lower().split()
+	text = message.content.lower()
+	args = text.split()
 
-	if contains(message.content, 'games'):
+	if contains(text, 'games'):
+		date = args[1]
 
-		games = lookup_games(args[1])
+		try:
+			datetime.datetime.strptime(date, '%m/%d/%Y')
+		except ValueError:
+			if date == "today" or date == "yesterday":
+				pass
+			else:
+				print('The date {} is invalid'.format(date))
+				await channel.send('The date {} is invalid'.format(date))
+				return
+
+		games = lookup_games(date)
 
 		for x in games.games:
 			games_list = games.games[x]
 		reply = ""
 
-		#print(games_list)
-		#print(games_today)
-
+		if not games_list:
+			await channel.send("There is currently no game data for the given date")
+			return
 
 		for i in range(len(games_list)):
 			home_team = games_list[i]['home_name']
@@ -64,8 +74,11 @@ async def on_message(message):
 			away_score = games_list[i]['away_score']
 			reply = reply + home_team + "  " + str(home_score) + "     " + away_team + "  " + str(away_score) + "\n"
 
-		print(reply[:-2])
-		await channel.send(reply[:-2])
+		#if not reply:
+		#	await channel.send("There is currently no game data for the given date")
+		#	return
+
+		await channel.send(reply[:-1])
 
 
 bot.run(TOKEN)
