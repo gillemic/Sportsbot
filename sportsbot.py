@@ -1,7 +1,6 @@
 import os
 import datetime
 import asyncio
-#from dateutil.parser import parse
 
 import discord
 from dotenv import load_dotenv
@@ -73,10 +72,6 @@ async def on_message(message):
 			home_score = games_list[i]['home_score']
 			away_score = games_list[i]['away_score']
 			reply = reply + home_team + "  " + str(home_score) + "     " + away_team + "  " + str(away_score) + "\n"
-
-		#if not reply:
-		#	await channel.send("There is currently no game data for the given date")
-		#	return
 
 		await channel.send(reply[:-1])
 
